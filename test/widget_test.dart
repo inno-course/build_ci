@@ -26,4 +26,70 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
   });
+
+  group('animated container', () {
+    final containerFinder = find.byKey(const ValueKey('first'));
+
+    testWidgets('exist', (WidgetTester tester) async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(const MyApp());
+      expect(containerFinder, findsOneWidget);
+    });
+
+    testWidgets('changes color after tap', (WidgetTester tester) async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(const MyApp());
+
+      var decorationStart = tester
+          .widget<AnimatedContainer>(containerFinder)
+          .decoration as BoxDecoration;
+
+      expect(decorationStart.color, Colors.red);
+
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      final decorationEnd = tester
+          .widget<AnimatedContainer>(containerFinder)
+          .decoration as BoxDecoration;
+
+      expect(decorationEnd.color, Colors.blue);
+    });
+
+    testWidgets('changes color with animation', (WidgetTester tester) async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(const MyApp());
+
+      await expectLater(
+        containerFinder,
+        matchesGoldenFile('MyApp.color.even.png'),
+      );
+
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      await expectLater(
+        containerFinder,
+        matchesGoldenFile('MyApp.color.even-to-odd-250.png'),
+      );
+
+      await tester.pump(const Duration(milliseconds: 250));
+      await expectLater(
+        containerFinder,
+        matchesGoldenFile('MyApp.color.even-to-odd-500.png'),
+      );
+
+      await tester.pump(const Duration(milliseconds: 250));
+      await expectLater(
+        containerFinder,
+        matchesGoldenFile('MyApp.color.even-to-odd-750.png'),
+      );
+
+      await tester.pump(const Duration(milliseconds: 250));
+      await expectLater(
+        containerFinder,
+        matchesGoldenFile('MyApp.color.odd.png'),
+      );
+    });
+  });
 }
